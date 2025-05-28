@@ -110,7 +110,11 @@ class tool_launch_service {
             ],
             'ags' => $launchdata['https://purl.imsglobal.org/spec/lti-ags/claim/endpoint'] ?? null,
             'nrps' => $launchdata['https://purl.imsglobal.org/spec/lti-nrps/claim/namesroleservice'] ?? null,
-            'lti1p1' => $launchdata['https://purl.imsglobal.org/spec/lti/claim/lti1p1'] ?? null
+            'lti1p1' => $launchdata['https://purl.imsglobal.org/spec/lti/claim/lti1p1'] ?? null,
+            'locale' => !empty($launchdata['https://purl.imsglobal.org/spec/lti/claim/launch_presentation']) &&
+                    !empty($launchdata['https://purl.imsglobal.org/spec/lti/claim/launch_presentation']['locale']) ?
+                    $launchdata['https://purl.imsglobal.org/spec/lti/claim/launch_presentation']['locale']
+                    : null
         ];
 
         return (object) $data;
@@ -195,11 +199,12 @@ class tool_launch_service {
     private function lti_user_from_launchdata(\stdClass $user, \stdClass $launchdata, \stdClass $resource,
             resource_link $resourcelink): user {
 
+        $lang = $launchdata['https://purl.imsglobal.org/spec/lti/claim/launch_presentation']['locale'] ?? $resource->lang;
         // Find the user based on the unique-to-the-issuer 'sub' value.
         if ($ltiuser = $this->userrepo->find_single_user_by_resource($user->id, $resource->id)) {
             // User exists, so update existing based on resource data which may have changed.
             $ltiuser->set_resourcelinkid($resourcelink->get_id());
-            $ltiuser->set_lang($resource->lang);
+            $ltiuser->set_lang($lang);
             $ltiuser->set_city($resource->city);
             $ltiuser->set_country($resource->country);
             $ltiuser->set_institution($resource->institution);
@@ -210,7 +215,7 @@ class tool_launch_service {
             $ltiuser = $resourcelink->add_user(
                 $user->id,
                 $launchdata->sub,
-                $resource->lang,
+                $lang,
                 $resource->city ?? '',
                 $resource->country ?? '',
                 $resource->institution ?? '',
@@ -368,6 +373,10 @@ class tool_launch_service {
             $SESSION->forcepagelayout = 'embedded';
         } else {
             unset($SESSION->forcepagelayout);
+        }
+
+        if ($launchdata->locale) {
+            $SESSION->lang = $launchdata->locale;
         }
 
         // Enrol the user in the course with no role.
