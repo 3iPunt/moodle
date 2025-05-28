@@ -104,6 +104,16 @@ class quiz_overview_table extends attempts_report_table {
                         WHERE $where
                        ) relevant_attempt_ids ON quizaouter.id = relevant_attempt_ids.id
                 ", $params);
+        error_log(print_r($usersjoins, 1));
+        error_log(print_r("
+                SELECT AVG(quizaouter.sumgrades) AS grade, COUNT(quizaouter.sumgrades) AS numaveraged
+                  FROM {quiz_attempts} quizaouter
+                  JOIN (
+                       SELECT DISTINCT quiza.id
+                         FROM $from
+                        WHERE $where
+                       ) relevant_attempt_ids ON quizaouter.id = relevant_attempt_ids.id
+                ", 1));
         $record->grade = quiz_rescale_grade($record->grade, $this->quiz, false);
         if ($this->is_downloading()) {
             $namekey = 'lastname';

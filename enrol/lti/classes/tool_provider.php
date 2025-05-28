@@ -327,6 +327,7 @@ class tool_provider extends ToolProvider {
             throw new \moodle_exception($result, 'enrol_lti');
             exit();
         }
+        die("a");
 
         // Give the user the role in the given context.
         $roleid = $isinstructor ? $tool->roleinstructor : $tool->rolelearner;

@@ -113,6 +113,7 @@ class manager {
      * @return bool
      */
     public static function report_source_available(string $source): bool {
+        error_log("crido a ". $source);
         return call_user_func([$source, 'is_available']);
     }
 

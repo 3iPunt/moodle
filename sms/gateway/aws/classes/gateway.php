@@ -33,6 +33,7 @@ class gateway extends \core_sms\gateway {
     public function send(
         message $message,
     ): message {
+
         global $DB;
         // Get the config from the message record.
         $awsconfig = $DB->get_field(
@@ -40,6 +41,7 @@ class gateway extends \core_sms\gateway {
             return: 'config',
             conditions: ['id' => $message->gatewayid, 'enabled' => 1, 'gateway' => 'smsgateway_aws\gateway',],
         );
+
         $status = \core_sms\message_status::GATEWAY_NOT_AVAILABLE;
         if ($awsconfig) {
             $config = (object)json_decode($awsconfig, true, 512, JSON_THROW_ON_ERROR);
